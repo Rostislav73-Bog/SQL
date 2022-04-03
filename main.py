@@ -10,14 +10,21 @@ app.include_router(router)
 
 async def create_user():
     conn = await asyncpg.connect(DATABASE_URL)
-    await conn('''
-        CREATE TABLE postgres(                  
-            id serial PRIMARY KEY,
-            name text
-        )
-    ''')                                            #Не создается, табличка. Использую Dbever. Почему?
+    # Cоздаю таблицу
+    await conn.execute('''              
+        CREATE TABLE  conn.execute (  
+	    user_id serial PRIMARY KEY,
+	    username VARCHAR( 255 ) UNIQUE NOT NULL
+        );
+    ''')                    # Не создается, таблица. Использую Dbever
     await conn.execute('''
-            INSERT INTO users(name) VALUES($1)
-        ''', 'Bob')
+            INSERT INTO conn.execute (username)
+            VALUES ("something_1");
+        ''')
+    # Добавлю информациб в созданную таблицу
+    await conn.execute('''
+                INSERT INTO count_name (username)
+                VALUES ("something_1");
+            ''')
 
     await conn.close()
