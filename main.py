@@ -1,30 +1,25 @@
 from fastapi import FastAPI
-import asyncpg
-from create import router
-
-DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
-
-app = FastAPI()
-app.include_router(router)
+from routes import router
+from UserPostgresService import user_service
 
 
-async def create_user():
-    conn = await asyncpg.connect(DATABASE_URL)
-    # Cоздаю таблицу
-    await conn.execute('''              
-        CREATE TABLE  conn.execute (  
-	    user_id serial PRIMARY KEY,
-	    username VARCHAR( 255 ) UNIQUE NOT NULL
-        );
-    ''')                    # Не создается, таблица. Использую Dbever
-    await conn.execute('''
-            INSERT INTO conn.execute (username)
-            VALUES ("something_1");
-        ''')
-    # Добавлю информациб в созданную таблицу
-    await conn.execute('''
-                INSERT INTO count_name (username)
-                VALUES ("something_1");
-            ''')
+def create_app() -> FastAPI:
+    app = FastAPI()
+    app.include_router(router)
 
-    await conn.close()
+    return app
+
+
+app = create_app()
+
+
+@app.on_event('startup')
+async def startup():
+    await user_service.connect()
+    print('connection db')
+
+
+@app.on_event('shutdown')
+async def shutdown():
+    await user_service.disconnect()
+    print('disconnecting db')
