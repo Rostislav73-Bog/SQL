@@ -2,3 +2,5 @@ pydantic
 uvicorn
 asyncpg
 fastapi == 0.75.0
+dependency_injector
+pyyaml

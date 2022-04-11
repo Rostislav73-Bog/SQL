@@ -33,19 +33,19 @@ class UserPostgresService:
 
     async def get_users(self):
         users = await self.connection.fetch(
-                f'select * from {self.table_name}'
+            f'select * from {self.table_name}'
         )
         return users
 
     async def get_user_by_id(self, user_id: int):
         user = await self.connection.fetchrow(
-                f'select * from {self.table_name} where user_id={user_id};'
+            f'select * from {self.table_name} where user_id={user_id};'
         )
         return user
 
     async def update_user_by_id(self, username: str):
         await self.connection.execute(
-            f'''UPDATE {self.table_name} SET {username} ;'''
+            f'UPDATE {self.table_name} SET {username} ;'
         )
 
     async def delete_user(self, user_id: int):
@@ -53,7 +53,3 @@ class UserPostgresService:
             DELETE FROM {self.table_name}
             WHERE {user_id};
         ''')
-
-
-connection_url = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
-user_service = UserPostgresService(connection_url, table_name='users')

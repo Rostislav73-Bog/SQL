@@ -1,11 +1,17 @@
 from fastapi import FastAPI
-from routes import router
-from UserPostgresService import user_service
+import routes
+from di_container import Container
 
 
 def create_app() -> FastAPI:
+    container = Container()
+    container.config.from_yaml('config/config.yaml')
+    container.wire(modules=[
+        routes
+    ])
     app = FastAPI()
-    app.include_router(router)
+    app.container = container
+    app.include_router(routes.router)
 
     return app
 
@@ -15,11 +21,11 @@ app = create_app()
 
 @app.on_event('startup')
 async def startup():
-    await user_service.connect()
+    await app.container.user_client().connect()
     print('connection db')
 
 
 @app.on_event('shutdown')
 async def shutdown():
-    await user_service.disconnect()
+    await app.container.user_client().disconnect()
     print('disconnecting db')

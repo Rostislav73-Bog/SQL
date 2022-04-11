@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-from UserPostgresService import user_service
+from UserPostgresService import UserPostgresService
+from di_container import Container
+from dependency_injector.wiring import inject, Provide
 
 router = APIRouter(
     prefix="/CRUD",
@@ -25,28 +27,36 @@ class UserModelUpdate(BaseModel):
 # Использую Postman для тестирование API
 
 @router.post("/create")
-async def create_user(db: UserModel):
-    await user_service.create_user(db.username, db.surname, db.age)
+@inject
+async def create_user(
+    db: UserModel,
+    user_client: UserPostgresService = Depends(Provide[Container.user_client])
+):
+    await user_client.create_user(db.username, db.surname, db.age)
 
 
 @router.get("/get_users")  # ALL
-async def get_users():
-    response = await user_service.get_users()
+@inject
+async def get_users(user_client: UserPostgresService = Depends(Provide[Container.user_client])):
+    response = await user_client.get_users()
     print(response)
     return response
 
 
 @router.get("/get_user/{id}")
-async def get_user_by_id(user_id):
-    user = await user_service.get_user_by_id(user_id)
+@inject
+async def get_user_by_id(user_id, user_client: UserPostgresService = Depends(Provide[Container.user_client])):
+    user = await user_client.get_user_by_id(user_id)
     return user
 
 
 @router.put("/update")
-async def update_user(db: UserModelUpdate):
-    await user_service.update_user_by_id(db)
+@inject
+async def update_user(db: UserModelUpdate, user_client: UserPostgresService = Depends(Provide[Container.user_client])):
+    await user_client.update_user_by_id(db)
 
 
 @router.delete("/delete")
-async def delete_user_id(db: UserModelId):
-    await user_service.delete_user(db)
+@inject
+async def delete_user_id(db: UserModelId, user_client: UserPostgresService = Depends(Provide[Container.user_client])):
+    await user_client.delete_user(db)
